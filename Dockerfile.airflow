@@ -1,0 +1,21 @@
+FROM apache/airflow:2.6.0
+
+ENV AIRFLOW_HOME=/opt/airflow
+ENV LOAD_EX=n
+ENV EXECUTOR=LocalExecutor
+ENV AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+ENV AIRFLOW_WEBSERVER_SECRET_KEY=this_is_a_very_secured_key
+
+WORKDIR $AIRFLOW_HOME
+COPY dags/ /opt/airflow/dags/
+COPY script/ /opt/airflow/script/
+COPY --chown=airflow:airflow script/entrypoint.sh /opt/airflow/script/entrypoint.sh
+COPY --chown=airflow:airflow resources/ /opt/airflow/resources/
+COPY requirements.txt /opt/airflow/requirements.txt
+
+RUN pip install --no-cache-dir -r /opt/airflow/requirements.txt
+
+RUN chmod +x /opt/airflow/script/entrypoint.sh
+
+EXPOSE 8080
+
